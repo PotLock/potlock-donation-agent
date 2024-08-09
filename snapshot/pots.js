@@ -1,7 +1,7 @@
  export const whitelistedPots = 
 [
   {
-    "potId": "creatives.v1.potfactory.potlock.near",
+    "id": "creatives.v1.potfactory.potlock.near",
     "name": "Creatives",
     "description": "Round for funding creative public goods. More info can be found at https://potlock.org/creatives\n",
     "project": [
@@ -34,7 +34,7 @@
     "isRoundLive": false
   },
   {
-    "potId": "africa-public-goods.v1.potfactory.potlock.near",
+    "id": "africa-public-goods.v1.potfactory.potlock.near",
     "name": "Africa Public Goods",
     "description": "For communities and public goods projects building in Africa https://potlock.org/africa",
     "project": [
@@ -56,7 +56,7 @@
     "isRoundLive": false
   },
   {
-    "potId": "ai.v1.potfactory.potlock.near",
+    "id": "ai.v1.potfactory.potlock.near",
     "name": "AI Public Goods",
     "description": "Supporting public goods in the artificial intelligence space. AI Research, open source projects, governance, ethics. AI x Web3. Learn more at https://potlock.org/ai",
     "project": [
@@ -86,7 +86,7 @@
     "isRoundLive": false
   },
   {
-    "potId": "build.v1.potfactory.potlock.near",
+    "id": "build.v1.potfactory.potlock.near",
     "name": "NEAR Retroactive Builders",
     "description": "For open source projects in the NEAR ecosystem that have not been previously/properly compensated. Projects & not individuals. For more info go to https://potlock.org/retroactive-builders",
     "project": [
@@ -126,7 +126,7 @@
     "isRoundLive": false
   },
   {
-    "potId": "oss.v1.potfactory.potlock.near",
+    "id": "oss.v1.potfactory.potlock.near",
     "name": "Open Source Software",
     "description": "To support impactful open source software projects on NEAR. More info at https://potlock.org/oss",
     "project": [
@@ -158,14 +158,14 @@
     "isRoundLive": false
   },
   {
-    "potId": "nearian.v1.potfactory.potlock.near",
+    "id": "nearian.v1.potfactory.potlock.near",
     "name": "NEARIANS (For Individuals)",
     "description": "This round is designed under-compensated evangelists in the NEAR ecosystem for their work. 🔗 https://potlock.org/nearian",
     "project": [],
     "isRoundLive": false
   },
   {
-    "potId": "college.v1.potfactory.potlock.near",
+    "id": "college.v1.potfactory.potlock.near",
     "name": "Blockchain Clubs - Summer Funding",
     "description": "A round by Blockchain Acceleration Foundation to fund blockchain clubs in the summer. https://potlock.org/baf",
     "project": [
@@ -183,14 +183,14 @@
     "isRoundLive": false
   },
   {
-    "potId": "infra.v1.potfactory.potlock.near",
+    "id": "infra.v1.potfactory.potlock.near",
     "name": "NDC Infra",
     "description": "Supporting NEAR infrastructure projects https://potlock.org/ndc-infra",
     "project": [],
     "isRoundLive": false
   },
   {
-    "potId": "marketing.v1.potfactory.potlock.near",
+    "id": "marketing.v1.potfactory.potlock.near",
     "name": "NEAR Marketing DAO",
     "description": "Supporting marketing initiatives on NEAR. Learn more at potlock.org/mdao ",
     "project": [
