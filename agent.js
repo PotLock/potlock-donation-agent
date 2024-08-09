@@ -14,9 +14,14 @@ import {
     HumanMessagePromptTemplate,
     SystemMessagePromptTemplate,
 } from "@langchain/core/prompts";
+import {
+    RunnableWithMessageHistory,
+  } from "@langchain/core/runnables";
 import { createRetrieverTool } from "langchain/tools/retriever";
 import { formatDocumentsAsString } from "langchain/util/document";
 import { DynamicTool } from "@langchain/core/tools";
+import { ChatMessageHistory } from "@langchain/community/stores/message/in_memory";
+
 
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 const model = new OpenAI({ apiKey: OPENAI_API_KEY, temperature: 0.9 });
@@ -75,10 +80,23 @@ async function getAnswer(question) {
         modelWithFunctions,
         new StringOutputParser(),
     ]);
+    const messageHistory = new ChatMessageHistory();
+    const config  = { configurable: { sessionId: "1" } };
+    const withHistory = new RunnableWithMessageHistory({
+        chain,
+        // Optionally, you can use a function which tracks history by session ID.
+        getMessageHistory: (_sessionId) => messageHistory,
+        inputMessagesKey: "input",
+        // This shows the runnable where to insert the history.
+        // We set to "history" here because of our MessagesPlaceholder above.
+        historyMessagesKey: "history",
+        config
+      });
+      
 
-    const answer = await chain.invoke(
+    const answer = await withHistory.invoke(
         question
     );
     console.log(answer)
 }
-getAnswer(`What is OSS pot?`)
+getAnswer(`How many projects in potlock?`)

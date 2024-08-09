@@ -88,7 +88,7 @@ async function run() {
         const dataProjectJson = (JSON.parse(Buffer.from(projectList.result).toString()));
 
         const data = {
-            id: pot.id,
+            potId: pot.id,
             name: potInfoData.pot_name,
             description: potInfoData.pot_description,
             project: dataProjectJson.map((item) => item.project_id),
