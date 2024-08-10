@@ -1,18 +1,21 @@
 import { OpenAI } from "langchain/llms/openai";
 import { OpenAIEmbeddings } from "langchain/embeddings/openai";
 import { HNSWLib } from "langchain/vectorstores/hnswlib";
-
+import { AgentExecutor } from "langchain/agents";
 import { } from 'dotenv/config'
 import {
     RunnablePassthrough,
     RunnableSequence,
 } from "@langchain/core/runnables";
-import { StringOutputParser } from "@langchain/core/output_parsers";
+import { ChatOpenAI, formatToOpenAIFunction } from "@langchain/openai";
+import { OpenAIFunctionsAgentOutputParser } from "langchain/agents/openai/output_parser"
+import { formatToOpenAIFunctionMessages } from "langchain/agents/format_scratchpad";
 import { convertToOpenAIFunction } from "@langchain/core/utils/function_calling";
 import {
     ChatPromptTemplate,
     HumanMessagePromptTemplate,
     SystemMessagePromptTemplate,
+    MessagesPlaceholder,
 } from "@langchain/core/prompts";
 import {
     RunnableWithMessageHistory,
@@ -27,7 +30,10 @@ import { SupabaseVectorStore } from "@langchain/community/vectorstores/supabase"
 
 
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
-const model = new OpenAI({ apiKey: OPENAI_API_KEY, temperature: 0.9 });
+const model = new ChatOpenAI({
+    temperature: 0,
+  });
+  
 
 async function getAnswer(question) {
     // STEP 1: Load the vector store
@@ -47,37 +53,72 @@ async function getAnswer(question) {
     });
 
     const vectorStoreRetriever = vectorStore.asRetriever();
-    
+    // Pot search tool
+    const vectorStorePOT = await HNSWLib.load(
+        "potlock-pots",
+        new OpenAIEmbeddings({ apiKey: OPENAI_API_KEY }),
+    );
+
+    const retrieverPOT = vectorStorePOT.asRetriever();
+
+    const toolPOT = await createRetrieverTool(retrieverPOT, {
+        name: "potlock_pot_mainnet",
+        description: "Searches POT address and returns POT general information.",
+    });
+
+    const toolProject = await createRetrieverTool(vectorStoreRetriever, {
+        name: "potlock_project_mainnet",
+        description: "Searches project address and returns project general information.",
+    });
 
     // Create a system & human prompt for the chat model
     const SYSTEM_TEMPLATE = `You are helpful assistant that specializes in https://app.potlock.org/.  Potlock is the portal for public goods, non-profits, and communities to raise funds transparently on the Near blockchain. Given a name or description, find project details or create donation transactions through your available tools.  In addition to fetching project metadata, you can also look up pot metadata.  Donations can be made to a project directly, or to a project within a pot if specified.  Whenever making a donate transaction only use the first transaction in the array (which will be the closest match) returned from the API.
-    {context}\n\n`
+\n\n`
 
     // STEP 3: Get the answer
     const messages = [
         SystemMessagePromptTemplate.fromTemplate(SYSTEM_TEMPLATE),
-        HumanMessagePromptTemplate.fromTemplate("{question}"),
+        HumanMessagePromptTemplate.fromTemplate("{input}"),
     ];
-    
 
-    const tools = [];
+    /** Define your list of tools. */
+    const customTool = new DynamicTool({
+        name: "get_word_length",
+        description: "Returns the length of a word.",
+        func: async (input) => input.length.toString(),
+    });
+
+    const tools = [toolProject,toolPOT];
     const modelWithFunctions = model.bind({
         functions: tools.map((tool) => convertToOpenAIFunction(tool)),
     });
-    const prompt = ChatPromptTemplate.fromMessages(messages);
-    const chain = RunnableSequence.from([
+    const prompt = ChatPromptTemplate.fromMessages([
+        ["system", SYSTEM_TEMPLATE],
+        ["human", "{input}"],
+        new MessagesPlaceholder("agent_scratchpad"),
+    ]);
+    const runnableAgent = RunnableSequence.from([
         {
-            context: vectorStoreRetriever.pipe(formatDocumentsAsString),
-            question: new RunnablePassthrough(),
+            input: (i) =>  i.input,
+            agent_scratchpad: (i) =>
+                formatToOpenAIFunctionMessages(i.steps),
         },
         prompt,
         modelWithFunctions,
-        new StringOutputParser(),
+        new OpenAIFunctionsAgentOutputParser(),
     ]);
 
-    const answer = await chain.invoke(
-        question
-    );
-    console.log(answer)
+    const executor = AgentExecutor.fromAgentAndTools({
+        agent: runnableAgent,
+        tools,
+    });
+
+    const response = await executor.invoke({ input: "Hello" });
+
+    console.log(response);
+    // const answer = await chain.invoke(
+    //     question
+    // );
+    // console.log(answer)
 }
-getAnswer(`What is oss pot?`)
+getAnswer(`What is magicbuild project?`)
