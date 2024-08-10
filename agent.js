@@ -32,6 +32,7 @@ import { SupabaseVectorStore } from "@langchain/community/vectorstores/supabase"
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 const model = new ChatOpenAI({
     temperature: 0,
+    apiKey:OPENAI_API_KEY
   });
   
 
@@ -39,6 +40,7 @@ async function getAnswer(question) {
     // STEP 1: Load the vector store
     const embeddings = new OpenAIEmbeddings({
         model: "text-embedding-3-small",
+        apiKey:OPENAI_API_KEY
     });
 
     const supabaseClient = createClient(
@@ -53,18 +55,7 @@ async function getAnswer(question) {
     });
 
     const vectorStoreRetriever = vectorStore.asRetriever();
-    // Pot search tool
-    const vectorStorePOT = await HNSWLib.load(
-        "potlock-pots",
-        new OpenAIEmbeddings({ apiKey: OPENAI_API_KEY }),
-    );
 
-    const retrieverPOT = vectorStorePOT.asRetriever();
-
-    const toolPOT = await createRetrieverTool(retrieverPOT, {
-        name: "potlock_pot_mainnet",
-        description: "Searches POT address and returns POT general information.",
-    });
 
     const toolProject = await createRetrieverTool(vectorStoreRetriever, {
         name: "potlock_project_mainnet",
@@ -81,14 +72,8 @@ async function getAnswer(question) {
         HumanMessagePromptTemplate.fromTemplate("{input}"),
     ];
 
-    /** Define your list of tools. */
-    const customTool = new DynamicTool({
-        name: "get_word_length",
-        description: "Returns the length of a word.",
-        func: async (input) => input.length.toString(),
-    });
 
-    const tools = [toolProject,toolPOT];
+    const tools = [toolProject];
     const modelWithFunctions = model.bind({
         functions: tools.map((tool) => convertToOpenAIFunction(tool)),
     });
@@ -113,7 +98,7 @@ async function getAnswer(question) {
         tools,
     });
 
-    const response = await executor.invoke({ input: "Hello" });
+    const response = await executor.invoke({ input: "What is AI public good pot?" });
 
     console.log(response);
     // const answer = await chain.invoke(

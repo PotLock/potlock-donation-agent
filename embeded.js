@@ -6,6 +6,7 @@ import { whitelistedPots } from './snapshot/pots.js'
 import { } from 'dotenv/config'
 import { createClient } from "@supabase/supabase-js";
 import { SupabaseVectorStore } from "@langchain/community/vectorstores/supabase";
+import { JSONLoader } from "langchain/document_loaders/fs/json";
 
 async function generateAndStoreEmbeddings() {
 
@@ -40,15 +41,13 @@ async function generateAndStoreEmbeddings() {
     }
     //const vectorStoreProject = await HNSWLib.fromDocuments(documentsProject, new OpenAIEmbeddings({ apiKey: process.env.OPENAI_API_KEY }));
     //vectorStoreProject.save(`potlock-projects`);
-   // vectorStore.addDocuments(documentsProject)
+     vectorStore.addDocuments(documentsProject)
     const documentsPots = [];
     for (const potDetail of whitelistedPots) {
         const pageContent = JSON.stringify(potDetail);
         if (potDetail && potDetail.id) {
             const metadata = {
-                source: `https://app.potlock.org/?tab=pot&potId==${potDetail.accountId}`,
-                name: potDetail.name,
-                accountId: potDetail.id,
+                source: `https://app.potlock.org/?tab=pot&potId=${potDetail.id}`,
             };
             new Document({ pageContent, metadata })
             documentsPots.push(new Document({ pageContent, metadata }));
