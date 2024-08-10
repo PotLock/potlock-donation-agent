@@ -17,6 +17,7 @@ import {
     SystemMessagePromptTemplate,
     MessagesPlaceholder,
 } from "@langchain/core/prompts";
+import { BufferMemory } from "langchain/memory";
 import {
     RunnableWithMessageHistory,
 } from "@langchain/core/runnables";
@@ -27,20 +28,29 @@ import { ChatMessageHistory } from "@langchain/community/stores/message/in_memor
 import { createClient } from "@supabase/supabase-js";
 import { } from 'dotenv/config'
 import { SupabaseVectorStore } from "@langchain/community/vectorstores/supabase";
-
+import { MongoDBChatMessageHistory } from "@langchain/mongodb";
+import { MongoClient, ObjectId } from "mongodb";
 
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 const model = new ChatOpenAI({
     temperature: 0,
-    apiKey:OPENAI_API_KEY
-  });
-  
+    apiKey: OPENAI_API_KEY
+});
+
+const mongoClient = new MongoClient(process.env.MONGODB_ATLAS_URI || "", {
+    driverInfo: { name: "langchainjs" },
+});
+await mongoClient.connect();
+const collection = mongoClient.db("langchain").collection("memory");
+
+// generate a new sessionId string
+const sessionId = "5";
 
 async function getAnswer(question) {
     // STEP 1: Load the vector store
     const embeddings = new OpenAIEmbeddings({
         model: "text-embedding-3-small",
-        apiKey:OPENAI_API_KEY
+        apiKey: OPENAI_API_KEY
     });
 
     const supabaseClient = createClient(
@@ -57,9 +67,9 @@ async function getAnswer(question) {
     const vectorStoreRetriever = vectorStore.asRetriever();
 
 
-    const toolProject = await createRetrieverTool(vectorStoreRetriever, {
-        name: "potlock_project_mainnet",
-        description: "Searches project address and returns project general information.",
+    const toolPotlockSearch = await createRetrieverTool(vectorStoreRetriever, {
+        name: "potlock_mainnet",
+        description: "Searches potlock's data and returns potlock's data general information.",
     });
 
     // Create a system & human prompt for the chat model
@@ -69,24 +79,41 @@ async function getAnswer(question) {
     // STEP 3: Get the answer
     const messages = [
         SystemMessagePromptTemplate.fromTemplate(SYSTEM_TEMPLATE),
+        new MessagesPlaceholder("history"),
         HumanMessagePromptTemplate.fromTemplate("{input}"),
+        new MessagesPlaceholder("agent_scratchpad")
     ];
 
 
-    const tools = [toolProject];
+    const tools = [toolPotlockSearch];
     const modelWithFunctions = model.bind({
         functions: tools.map((tool) => convertToOpenAIFunction(tool)),
     });
-    const prompt = ChatPromptTemplate.fromMessages([
-        ["system", SYSTEM_TEMPLATE],
-        ["human", "{input}"],
-        new MessagesPlaceholder("agent_scratchpad"),
-    ]);
+    const memory = new BufferMemory({
+        chatHistory: new MongoDBChatMessageHistory({
+            collection,
+            sessionId,
+        }),
+        returnMessages: true,
+        inputKey: "input",
+        outputKey: "output",
+        memoryKey: "history",
+    });
+
+
+    console.log(await memory.chatHistory.getMessages());
+    const prompt = ChatPromptTemplate.fromMessages(messages);
     const runnableAgent = RunnableSequence.from([
         {
-            input: (i) =>  i.input,
+            input: (i) => i.input,
+            memory: () => memory.loadMemoryVariables({}),
             agent_scratchpad: (i) =>
                 formatToOpenAIFunctionMessages(i.steps),
+        },
+        {
+            input: (previousOutput) => previousOutput.input,
+            agent_scratchpad: (previousOutput) => previousOutput.agent_scratchpad,
+            history: (previousOutput) => previousOutput.memory.history,
         },
         prompt,
         modelWithFunctions,
@@ -97,13 +124,30 @@ async function getAnswer(question) {
         agent: runnableAgent,
         tools,
     });
+    const input0 = { input: "Hi! Im kuro" };
 
-    const response = await executor.invoke({ input: "What is AI public good pot?" });
+    const result0 = await executor.invoke(input0);
+    await memory.saveContext(input0, {
+        output: result0.output,
+    });
+    console.log(result0);
+    
+    // Save to History
 
-    console.log(response);
+    console.log(await memory.loadMemoryVariables({}));
+
+    const input1 = { input: "What did I just say my name was?" };
+
+    const result1 = await executor.invoke(input1);
+    console.log(result1);
+    await memory.saveContext(input0, {
+        output: result1.output,
+    });
+
     // const answer = await chain.invoke(
     //     question
     // );
     // console.log(answer)
+    //await memory.chatHistory.clear();
 }
 getAnswer(`What is magicbuild project?`)
