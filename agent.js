@@ -22,9 +22,6 @@ import {
     RunnableWithMessageHistory,
 } from "@langchain/core/runnables";
 import { createRetrieverTool } from "langchain/tools/retriever";
-import { formatDocumentsAsString } from "langchain/util/document";
-import { DynamicTool } from "@langchain/core/tools";
-import { ChatMessageHistory } from "@langchain/community/stores/message/in_memory";
 import { createClient } from "@supabase/supabase-js";
 import { } from 'dotenv/config'
 import { SupabaseVectorStore } from "@langchain/community/vectorstores/supabase";
@@ -44,9 +41,9 @@ await mongoClient.connect();
 const collection = mongoClient.db("langchain").collection("memory");
 
 // generate a new sessionId string
-const sessionId = "5";
+const sessionId = "1";
 
-async function getAnswer(question) {
+async function getAnswer() {
     // STEP 1: Load the vector store
     const embeddings = new OpenAIEmbeddings({
         model: "text-embedding-3-small",
@@ -67,14 +64,17 @@ async function getAnswer(question) {
     const vectorStoreRetriever = vectorStore.asRetriever();
 
 
-    const toolPotlockSearch = await createRetrieverTool(vectorStoreRetriever, {
-        name: "potlock_mainnet",
+    const toolPotlockSearch =  createRetrieverTool(vectorStoreRetriever, {
+        name: "potlockAPI",
         description: "Searches potlock's data and returns potlock's data general information.",
     });
 
     // Create a system & human prompt for the chat model
-    const SYSTEM_TEMPLATE = `You are helpful assistant that specializes in https://app.potlock.org/.  Potlock is the portal for public goods, non-profits, and communities to raise funds transparently on the Near blockchain. Given a name or description, find project details or create donation transactions through your available tools.  In addition to fetching project metadata, you can also look up pot metadata.  Donations can be made to a project directly, or to a project within a pot if specified.  Whenever making a donate transaction only use the first transaction in the array (which will be the closest match) returned from the API.
-\n\n`
+    const SYSTEM_TEMPLATE = `You are helpful assistant that specializes in https://app.potlock.org/.
+    Potlock is the portal for public goods, non-profits, and communities to raise funds transparently on the Near blockchain.
+    Given a name or description, find project details or create donation transactions through your available tools. 
+    In addition to fetching project metadata, you can also look up pot metadata.  Donations can be made to a project directly, or to a project within a pot if specified. 
+    Whenever making a donate transaction only use the first transaction in the array (which will be the closest match) returned from the API.`
 
     // STEP 3: Get the answer
     const messages = [
@@ -101,7 +101,7 @@ async function getAnswer(question) {
     });
 
 
-    console.log(await memory.chatHistory.getMessages());
+    
     const prompt = ChatPromptTemplate.fromMessages(messages);
     const runnableAgent = RunnableSequence.from([
         {
@@ -124,7 +124,7 @@ async function getAnswer(question) {
         agent: runnableAgent,
         tools,
     });
-    const input0 = { input: "Hi! Im kuro" };
+    const input0 = { input: "I like magicbuild project" };  
 
     const result0 = await executor.invoke(input0);
     await memory.saveContext(input0, {
@@ -134,9 +134,9 @@ async function getAnswer(question) {
     
     // Save to History
 
-    console.log(await memory.loadMemoryVariables({}));
+   // console.log(await memory.loadMemoryVariables({}));
 
-    const input1 = { input: "What did I just say my name was?" };
+    const input1 = { input: "what should project I donate?" };
 
     const result1 = await executor.invoke(input1);
     console.log(result1);
@@ -148,6 +148,6 @@ async function getAnswer(question) {
     //     question
     // );
     // console.log(answer)
-    //await memory.chatHistory.clear();
+    await memory.chatHistory.clear();
 }
-getAnswer(`What is magicbuild project?`)
+getAnswer()
