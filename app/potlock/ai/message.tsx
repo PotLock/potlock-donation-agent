@@ -8,7 +8,7 @@ export function AIMessage(props: { value: StreamableValue<string> }) {
 
   return (
     <div className="empty:hidden border border-gray-700 p-3 rounded-lg max-w-[50vw]">
-      <Markdown children={data}/>
+      <Markdown>{data}</Markdown>
     </div>
   );
 }

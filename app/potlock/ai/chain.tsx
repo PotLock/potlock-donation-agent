@@ -72,8 +72,8 @@ const potlockTool = tool(
 
     stream.done(
       <div className="flex gap-2 flex-wrap justify-end">
-        {filters.map((content) => (
-          <div className="max-w-sm bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
+        {filters.map((content,index) => (
+          <div className="max-w-sm bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700" key={index}>
             <a href="#">
               <img className="rounded-t-lg" src={content.backgroundImage} alt="" />
             </a>
