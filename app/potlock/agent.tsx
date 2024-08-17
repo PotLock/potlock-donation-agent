@@ -11,7 +11,6 @@ async function agent(inputs: {
 }) {
   "use server";
   
- // console.log(inputs.chat_history)
   return streamRunnableUI(agentExecutor, {
     input: inputs.input,
     chat_history: inputs.chat_history.map(
