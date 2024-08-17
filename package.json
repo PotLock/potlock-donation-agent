@@ -10,7 +10,7 @@
     "format": "prettier --write \"app\""
   },
   "engines": {
-    "node": ">=18"
+    "node": ">=20"
   },
   "dependencies": {
     "@langchain/community": "^0.2.23",
