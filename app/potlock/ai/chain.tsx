@@ -18,6 +18,7 @@ import { OpenAIEmbeddings } from "@langchain/openai";
 import { createRetrieverTool } from "langchain/tools/retriever";
 import { SupabaseVectorStore } from "@langchain/community/vectorstores/supabase";
 import {
+    Runnable,
     RunnableSequence,
 } from "@langchain/core/runnables";
 import { formatToOpenAIFunctionMessages } from "langchain/agents/format_scratchpad";
@@ -115,7 +116,7 @@ const modelWithFunctions = model.bind({
     functions: tools.map((tool) => convertToOpenAIFunction(tool)),
 });
 
-const runnableAgent = RunnableSequence.from([
+const runnableAgent : Runnable = RunnableSequence.from([
     {
         input: (i) => i.input,
         memory: async () => {
