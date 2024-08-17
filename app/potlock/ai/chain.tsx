@@ -118,20 +118,20 @@ const modelWithFunctions = model.bind({
 });
 
 const runnableAgent  = RunnableSequence.from([
-    new Runnable({
-        invoke: async (i) => ({
-            input: i.input,
-            memory: await memory().loadMemoryVariables({}),
-            agent_scratchpad: formatToOpenAIFunctionMessages(i.steps),
-        }),
-    }),
-    new Runnable({
-        invoke: async (previousOutput) => ({
-            input: previousOutput.input,
-            agent_scratchpad: previousOutput.agent_scratchpad,
-            history: previousOutput.memory.history,
-        }),
-    }),
+    {
+        input: (i) => i.input,
+        memory: async () => {
+            console.log((await memory()).loadMemoryVariables({}))
+            return (await memory()).loadMemoryVariables({}) 
+        },
+        agent_scratchpad: (i) =>
+            formatToOpenAIFunctionMessages(i.steps),
+    },
+    {
+        input: (previousOutput) => previousOutput.input,
+        agent_scratchpad: (previousOutput) => previousOutput.agent_scratchpad,
+        history: (previousOutput) => previousOutput.memory.history,
+    },
     prompt,
     modelWithFunctions,
     new OpenAIFunctionsAgentOutputParser(),
