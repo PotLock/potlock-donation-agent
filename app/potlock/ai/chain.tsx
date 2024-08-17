@@ -19,6 +19,7 @@ import { createRetrieverTool } from "langchain/tools/retriever";
 import { SupabaseVectorStore } from "@langchain/community/vectorstores/supabase";
 import {
     Runnable,
+    RunnableLike,
     RunnableSequence,
 } from "@langchain/core/runnables";
 import { formatToOpenAIFunctionMessages } from "langchain/agents/format_scratchpad";
@@ -116,7 +117,7 @@ const modelWithFunctions = model.bind({
     functions: tools.map((tool) => convertToOpenAIFunction(tool)),
 });
 
-const runnableAgent : any = RunnableSequence.from([
+const runnableAgent : RunnableLike<any, any> = RunnableSequence.from([
     {
         input: (i) => i.input,
         memory: async () => {

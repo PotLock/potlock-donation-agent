@@ -13,7 +13,7 @@ async function agent(inputs: {
 }) {
   "use server";
   
-  return streamRunnableUI(agentExecutor  as any, {
+  return streamRunnableUI(agentExecutor  as unknown as Runnable, {
     input: inputs.input,
     chat_history: inputs.chat_history.map(
       ([role, content]) => new ChatMessage(content, role),

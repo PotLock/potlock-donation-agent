@@ -52,7 +52,6 @@ export default function GenerativeUIPage({ }) {
     console.log(`The reason for hiding the modal ${hideReason}`);
     if (hideReason == 'wallet-navigation' && accountId) {
       signIn('credentials', { address: accountId })
-
     }
   });
 
