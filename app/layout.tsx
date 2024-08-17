@@ -4,13 +4,13 @@ import { Public_Sans } from "next/font/google";
 import "@near-wallet-selector/modal-ui/styles.css";
 import { Navbar } from "@/components/Navbar";
 import { WalletSelectorContextProvider } from "@/app/contexts/WalletSelectorContext"
-
 const publicSans = Public_Sans({ subsets: ["latin"] });
 
 export default function RootLayout({
   children,
 }: {
   children: React.ReactNode;
+
 }) {
   return (
 
@@ -38,10 +38,10 @@ export default function RootLayout({
       </head>
       <body className={publicSans.className}>
         <div className="flex flex-col p-4 md:p-12 h-[100vh]">
-          <WalletSelectorContextProvider>
-            <Navbar></Navbar>
-            {children}
-          </WalletSelectorContextProvider>
+            <WalletSelectorContextProvider>
+              <Navbar></Navbar>
+              {children}
+            </WalletSelectorContextProvider>
         </div>
       </body>
     </html>

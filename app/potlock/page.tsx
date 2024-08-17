@@ -5,7 +5,7 @@ import type { EndpointsContext } from "./agent";
 import { useActions } from "./utils/client";
 import { LocalContext } from "./shared";
 import { useWalletSelector } from "@/app/contexts/WalletSelectorContext"
-import { redirect } from 'next/navigation'
+import { signIn } from 'next-auth/react'
 
 export default function GenerativeUIPage({ }) {
 
@@ -16,11 +16,11 @@ export default function GenerativeUIPage({ }) {
   const historyState = useState<[role: string, content: string][]>([]);
   const [history, setHistory] = historyState;
 
+
   async function onSubmit(input: string) {
     const newElements = [...elements];
     // execute the agent with user input and chat history
     const element = await actions.agent({ input, chat_history: history });
-
     newElements.push(
       <div className="flex flex-col gap-2" key={history.length}>
         <div className="bg-gray-700 p-3 rounded-lg self-start max-w-[50vw]">
@@ -48,18 +48,14 @@ export default function GenerativeUIPage({ }) {
     setElements(newElements);
     setInput("");
   }
+  const subscription = modal.on("onHide", ({ hideReason }) => {
+    console.log(`The reason for hiding the modal ${hideReason}`);
+    if (hideReason == 'wallet-navigation' && accountId) {
+      signIn('credentials', { address: accountId })
 
-  const authRediect = (accountId: string) => {
-    const url = new URL(window.location.href);
-    const searchParams = url.searchParams;
-    const accountParam = searchParams.get('accountId') as string;
-    if (!accountParam || accountParam !== accountId) {
-      redirect(`/potlock?accountId=${accountId}`)
     }
-  }
-  if (accountId) {
-    authRediect(accountId);
-  }
+  });
+
   const handleSignIn = () => {
     modal.show();
   };

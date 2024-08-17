@@ -11,7 +11,7 @@ import { StreamEvent } from "@langchain/core/tracers/log_stream";
 import { AIProvider } from "./client";
 import { AIMessage } from "../ai/message";
 import { CompiledStateGraph } from "@langchain/langgraph";
-
+import { memory } from "../ai/memory"
 const STREAM_UI_RUN_NAME = "stream_runnable_ui";
 
 /**
@@ -61,11 +61,11 @@ export function streamRunnableUI<RunInput, RunOutput>(
             // as the stream events are updated immediately in the UI
             // rather than being batched by React via createStreamableUI
             const textStream = createStreamableValue();
-            
+
             ui.append(<AIMessage value={textStream.value} />);
             callbacks[streamEvent.run_id] = textStream;
           }
-          
+
           callbacks[streamEvent.run_id].append(chunk.text);
         }
       }
@@ -77,9 +77,12 @@ export function streamRunnableUI<RunInput, RunOutput>(
     // to the client thanks to RSC
     resolve(lastEventValue?.data.output);
     Object.values(callbacks).forEach((cb) => cb.done());
+    const savedInput = (inputs as any)?.input ?? {};
+    (await memory()).saveContext({ input: savedInput }, { output: lastEventValue?.data.output })
+    console.log()
     ui.done();
   })();
-  
+
   return { ui: ui.value, lastEvent };
 }
 
