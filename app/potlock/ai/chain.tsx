@@ -116,7 +116,7 @@ const modelWithFunctions = model.bind({
     functions: tools.map((tool) => convertToOpenAIFunction(tool)),
 });
 
-const runnableAgent : Runnable = RunnableSequence.from([
+const runnableAgent : any = RunnableSequence.from([
     {
         input: (i) => i.input,
         memory: async () => {
