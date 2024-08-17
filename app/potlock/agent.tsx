@@ -5,8 +5,6 @@ import { exposeEndpoints, streamRunnableUI } from "./utils/server";
 import { ChatMessage } from "@langchain/core/messages";
 import {
   Runnable,
-  RunnableConfig,
-  RunnableLambda,
 } from "@langchain/core/runnables";
 
 async function agent(inputs: {
@@ -14,8 +12,8 @@ async function agent(inputs: {
   chat_history: [role: string, content: string][];
 }) {
   "use server";
-  
-  return streamRunnableUI(agentExecutor  as unknown as Runnable, {
+
+  return streamRunnableUI(agentExecutor as any, {
     input: inputs.input,
     chat_history: inputs.chat_history.map(
       ([role, content]) => new ChatMessage(content, role),
