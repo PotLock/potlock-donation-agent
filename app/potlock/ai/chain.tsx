@@ -49,7 +49,6 @@ const potlockTool = tool(
             filter: {
                 "type": "potlock-project"
             },
-
         });
         const similaritySearchResults = await vectorStore.similaritySearchWithScore(input.query, 10);
 
