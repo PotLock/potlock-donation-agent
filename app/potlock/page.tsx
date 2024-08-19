@@ -5,7 +5,7 @@ import type { EndpointsContext } from "./agent";
 import { useActions } from "./utils/client";
 import { LocalContext } from "./shared";
 import { useWalletSelector } from "@/app/contexts/WalletSelectorContext"
-import { signIn } from 'next-auth/react'
+import { signIn , signOut } from 'next-auth/react'
 
 export default function GenerativeUIPage({ }) {
 
@@ -64,6 +64,7 @@ export default function GenerativeUIPage({ }) {
       console.log("Failed to sign out");
       console.error(err);
     });
+    signOut()
   };
   return (
     <div>

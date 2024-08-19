@@ -33,7 +33,8 @@ const potlockTool = tool(
     async (input, config) => {
         const embeddings = new OpenAIEmbeddings({
             model: "text-embedding-3-small",
-            apiKey: OPENAI_API_KEY
+            apiKey: OPENAI_API_KEY,
+            verbose: true
         });
 
         const supabaseClient = createClient(
@@ -45,9 +46,13 @@ const potlockTool = tool(
             client: supabaseClient,
             tableName: "documents",
             queryName: "match_documents",
+            filter: {
+                "type": "potlock-project"
+            },
+
         });
         const similaritySearchResults = await vectorStore.similaritySearchWithScore(input.query, 10);
-        console.log(similaritySearchResults)
+
         const filters = [];
         for (const doc of similaritySearchResults) {
             if (doc[1] > 0.4) {
@@ -117,12 +122,11 @@ const modelWithFunctions = model.bind({
     functions: tools.map((tool) => convertToOpenAIFunction(tool)),
 });
 
-const runnableAgent  = RunnableSequence.from([
+const runnableAgent = RunnableSequence.from([
     {
         input: (i) => i.input,
         memory: async () => {
-            console.log((await memory()).loadMemoryVariables({}))
-            return (await memory()).loadMemoryVariables({}) 
+            return (await memory()).loadMemoryVariables({})
         },
         agent_scratchpad: (i) =>
             formatToOpenAIFunctionMessages(i.steps),
