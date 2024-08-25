@@ -51,7 +51,6 @@ const potlockTool = tool(
 
         const filters = [];
         for (const doc of similaritySearchResults) {
-            console.log(doc[1])
             if (doc[1] > 0.4) {
                 filters.push(JSON.parse(doc[0].pageContent))
             }
