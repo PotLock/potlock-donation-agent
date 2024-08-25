@@ -26,6 +26,7 @@ import {
 import { formatToOpenAIFunctionMessages } from "langchain/agents/format_scratchpad";
 import { OpenAIFunctionsAgentOutputParser } from "langchain/agents/openai/output_parser"
 import { convertToOpenAIFunction } from "@langchain/core/utils/function_calling";
+import { text } from "stream/consumers";
 
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 
@@ -101,7 +102,6 @@ const createTransactionTool = tool(
 
         const stream = await createRunnableUI(config);
         const similaritySearchResults = await vectorStore.similaritySearchWithScore(input.query, 1);
-        console.log(similaritySearchResults)
         const doc = JSON.parse(similaritySearchResults[0][0].pageContent)
         stream.update(<div>Creating transaction</div>);
         //search vector project
@@ -122,15 +122,17 @@ const createTransactionTool = tool(
                         }
                     }
                 }
-            }></CreateTransaction>
+            }
+            text={'Donate now'}
+            ></CreateTransaction>
         );
-        return ""
+        return doc
     },
     {
         name: "create-transaction",
         description: "A transaction tool for potlock . create transaction button",
         schema: z.object({
-            query: z.string().describe("The search query used to search for potlock's project."),
+            query: z.string().describe("The search query used to search for project."),
             amount: z.string().describe("Amount of Near to donate"),
         }),
     },

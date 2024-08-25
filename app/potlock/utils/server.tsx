@@ -79,7 +79,6 @@ export function streamRunnableUI<RunInput, RunOutput>(
     Object.values(callbacks).forEach((cb) => cb.done());
     const savedInput = (inputs as any)?.input ?? {};
     (await memory()).saveContext({ input: savedInput }, { output: lastEventValue?.data.output })
-    console.log()
     ui.done();
   })();
 

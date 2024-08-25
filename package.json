@@ -19,6 +19,7 @@
     "@langchain/mongodb": "^0.0.5",
     "@langchain/openai": "^0.2.6",
     "@near-wallet-selector/core": "^8.9.12",
+    "@near-wallet-selector/here-wallet": "^8.9.12",
     "@near-wallet-selector/modal-ui": "^8.9.12",
     "@near-wallet-selector/my-near-wallet": "^8.9.12",
     "@near-wallet-selector/nightly": "^8.9.12",

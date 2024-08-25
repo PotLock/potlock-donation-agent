@@ -5,6 +5,7 @@ import type { WalletSelectorModal } from "@near-wallet-selector/modal-ui";
 import { setupModal } from "@near-wallet-selector/modal-ui";
 import { setupNightly } from "@near-wallet-selector/nightly";
 import { setupMyNearWallet } from "@near-wallet-selector/my-near-wallet";
+import { setupHereWallet } from "@near-wallet-selector/here-wallet";
 
 import type { ReactNode } from "react";
 import React, {
@@ -54,15 +55,16 @@ export const WalletSelectorContextProvider: React.FC<{
 
   const init = useCallback(async () => {
     const _selector = await setupWalletSelector({
-      network: "testnet",
+      network: "mainnet",
       debug: true,
       modules: [
         setupNightly(),
         setupMyNearWallet(),
+        setupHereWallet(),
       ],
     });
     const _modal = setupModal(_selector, {
-      contractId: "game1.joychi.testnet",
+      contractId: "donate.potlock.near",
     });
     const state = _selector.store.getState();
     setAccounts(state.accounts);
