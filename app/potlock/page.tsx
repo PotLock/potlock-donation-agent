@@ -13,7 +13,7 @@ export default function GenerativeUIPage({ }) {
   const actions = useActions<typeof EndpointsContext>();
   const [elements, setElements] = useState<JSX.Element[]>([]);
   const [input, setInput] = useState("");
-  const historyState = useState<[role: string, content: string][]>([]);
+  const historyState = useState<[role: string, content: any][]>([]);
   const [history, setHistory] = historyState;
 
 
@@ -51,7 +51,6 @@ export default function GenerativeUIPage({ }) {
   const subscription = modal.on("onHide", ({ hideReason }) => {
     console.log(`The reason for hiding the modal ${hideReason}`);
     if (hideReason == 'wallet-navigation' && accountId) {
-      console.log("accountId",accountId)
       signIn('credentials', { address: accountId })
     }
   });
