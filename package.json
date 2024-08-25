@@ -31,7 +31,7 @@
     "autoprefixer": "10.4.14",
     "eslint": "8.46.0",
     "eslint-config-next": "13.4.12",
-    "langchain": "^0.2.12",
+    "langchain": "^0.2.16",
     "mongodb": "^6.8.0",
     "near-api-js": "^4.0.3",
     "next": "^14.2.3",

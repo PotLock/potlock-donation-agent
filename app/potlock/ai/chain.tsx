@@ -8,6 +8,7 @@ import { AgentExecutor, createToolCallingAgent } from "langchain/agents";
 import { ChatOpenAI } from "@langchain/openai";
 import { string, z } from "zod";
 import { Place } from "@/app/potlock/components/place";
+import { CreateTransaction } from "@/app/potlock/components/transaction";
 import { createRunnableUI } from "../utils/server";
 import { search, images } from "./tools";
 import { memory } from "./memory";
@@ -28,32 +29,30 @@ import { convertToOpenAIFunction } from "@langchain/core/utils/function_calling"
 
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 
+const embeddings = new OpenAIEmbeddings({
+    model: "text-embedding-3-small",
+    apiKey: OPENAI_API_KEY
+});
+
+const supabaseClient = createClient(
+    process.env.SUPABASE_URL as string,
+    process.env.SUPABASE_PRIVATE_KEY as string
+);
+
+const vectorStore = new SupabaseVectorStore(embeddings, {
+    client: supabaseClient,
+    tableName: "documents",
+    queryName: "match_documents",
+});
 
 const potlockTool = tool(
     async (input, config) => {
-        const embeddings = new OpenAIEmbeddings({
-            model: "text-embedding-3-small",
-            apiKey: OPENAI_API_KEY,
-            verbose: true
-        });
 
-        const supabaseClient = createClient(
-            process.env.SUPABASE_URL as string,
-            process.env.SUPABASE_PRIVATE_KEY as string
-        );
-
-        const vectorStore = new SupabaseVectorStore(embeddings, {
-            client: supabaseClient,
-            tableName: "documents",
-            queryName: "match_documents",
-            filter: {
-                "type": "potlock-project"
-            },
-        });
-        const similaritySearchResults = await vectorStore.similaritySearchWithScore(input.query, 10);
+        const similaritySearchResults = await vectorStore.similaritySearchWithScore(input.query, 5);
 
         const filters = [];
         for (const doc of similaritySearchResults) {
+            console.log(doc[1])
             if (doc[1] > 0.4) {
                 filters.push(JSON.parse(doc[0].pageContent))
             }
@@ -90,9 +89,49 @@ const potlockTool = tool(
     },
     {
         name: "potlockAPI",
-        description: "A search engine for potlock's data. useful for when you need to answer questions about current events. input should be a search query.",
+        description: "A search engine for potlock's project. input should be a search query.",
         schema: z.object({
-            query: z.string().describe("The search query used to search for potlock's data general information."),
+            query: z.string().describe("The search query used to search for potlock's project."),
+        }),
+    },
+);
+
+const createTransactionTool = tool(
+    async (input, config) => {
+
+        const stream = await createRunnableUI(config);
+        const similaritySearchResults = await vectorStore.similaritySearchWithScore(input.query, 1);
+        console.log(similaritySearchResults)
+        const doc = JSON.parse(similaritySearchResults[0][0].pageContent)
+        stream.update(<div>Creating transaction</div>);
+        //search vector project
+        stream.done(
+            <CreateTransaction transaction={
+                {
+                    receiverId: "donate.potlock.near",
+                    action: {
+                        params: {
+                            methodName: "donate",
+                            args: {
+                                recipient_id: doc.accountId,
+                                bypass_protocol_fee: false,
+                                message: "Donate from mintbase wallet",
+                            },
+                            gas: "300000000000000",
+                            deposit: input.amount
+                        }
+                    }
+                }
+            }></CreateTransaction>
+        );
+        return ""
+    },
+    {
+        name: "create-transaction",
+        description: "A transaction tool for potlock . create transaction button",
+        schema: z.object({
+            query: z.string().describe("The search query used to search for potlock's project."),
+            amount: z.string().describe("Amount of Near to donate"),
         }),
     },
 );
@@ -116,7 +155,7 @@ const model = new ChatOpenAI({
     apiKey: OPENAI_API_KEY
 });
 
-const tools = [potlockTool];
+const tools = [potlockTool, createTransactionTool];
 const modelWithFunctions = model.bind({
     functions: tools.map((tool) => convertToOpenAIFunction(tool)),
 });

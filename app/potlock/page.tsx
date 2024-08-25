@@ -51,6 +51,7 @@ export default function GenerativeUIPage({ }) {
   const subscription = modal.on("onHide", ({ hideReason }) => {
     console.log(`The reason for hiding the modal ${hideReason}`);
     if (hideReason == 'wallet-navigation' && accountId) {
+      console.log("accountId",accountId)
       signIn('credentials', { address: accountId })
     }
   });
@@ -64,7 +65,6 @@ export default function GenerativeUIPage({ }) {
       console.log("Failed to sign out");
       console.error(err);
     });
-    signOut()
   };
   return (
     <div>

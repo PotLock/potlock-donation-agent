@@ -2865,10 +2865,10 @@ keyv@^4.5.3:
   dependencies:
     json-buffer "3.0.1"
 
-langchain@*, langchain@^0.2.12, langchain@~0.2.3:
-  version "0.2.13"
-  resolved "https://registry.npmjs.org/langchain/-/langchain-0.2.13.tgz"
-  integrity sha512-PQoDLEoFPyeqUE8YS+Eoxo8F+6ltNeJv/ijiNGp/eomHnVxHkqTXqc9/JK6bii6O/WryOClT7kVNPpVrMNNdzg==
+langchain@*, langchain@^0.2.16, langchain@~0.2.3:
+  version "0.2.16"
+  resolved "https://registry.npmjs.org/langchain/-/langchain-0.2.16.tgz"
+  integrity sha512-NaCl1jdxladaLd63VxGtVcbuypzTq14XSmQI6vBajAISJgz02Q1+wiAIPIC2wMfsKjBRoCSgNCJw3/7nxqUuoQ==
   dependencies:
     "@langchain/core" ">=0.2.21 <0.3.0"
     "@langchain/openai" ">=0.1.0 <0.3.0"
