@@ -62,7 +62,7 @@ const potlockTool = tool(
         stream.done(
             <div className="flex gap-2 flex-wrap justify-end">
                 {filters.map((content, index) => (
-                    <Project content={content} index={index}></Project>
+                    <Project content={content} key={index}></Project>
                 ))}
             </div>
         );

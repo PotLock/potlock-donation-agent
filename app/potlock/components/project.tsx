@@ -9,12 +9,11 @@ export function Project(props: {
         description: string;
         backgroundImage: string;
     };
-    index: number
 }) {
     const onAction = useContext(LocalContext);
     return (
         // eslint-disable-next-line @next/next/no-img-element
-        <div className="max-w-sm bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700" key={props.index}>
+        <div className="max-w-sm bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
             <a href="#">
                 <img className="rounded-t-lg" src={props.content.backgroundImage} alt="" />
             </a>
