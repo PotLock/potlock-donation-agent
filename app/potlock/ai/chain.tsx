@@ -6,13 +6,11 @@ import {
 } from "@langchain/core/prompts";
 import { AgentExecutor, createToolCallingAgent } from "langchain/agents";
 import { ChatOpenAI } from "@langchain/openai";
-import { string, z } from "zod";
-import { Place } from "@/app/potlock/components/place";
+import {  z } from "zod";
 import { CreateTransaction } from "@/app/potlock/components/transaction";
 import { createRunnableUI } from "../utils/server";
-import { search, images } from "./tools";
 import { memory } from "./memory";
-import { Images } from "../components/image";
+import { Project } from "../components/project";
 import { tool } from "@langchain/core/tools";
 import { createClient } from "@supabase/supabase-js";
 import { OpenAIEmbeddings } from "@langchain/openai";
@@ -64,20 +62,7 @@ const potlockTool = tool(
         stream.done(
             <div className="flex gap-2 flex-wrap justify-end">
                 {filters.map((content, index) => (
-                    <div className="max-w-sm bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700" key={index}>
-                        <a href="#">
-                            <img className="rounded-t-lg" src={content.backgroundImage} alt="" />
-                        </a>
-                        <div className="p-5">
-                            <a href="#">
-                                <h5 className="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">{content.name}</h5>
-                            </a>
-                            <p className="mb-3 font-normal text-gray-700 dark:text-gray-400">{content.description}</p>
-                            <a href="#" className="inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
-                                Donate Now
-                            </a>
-                        </div>
-                    </div>
+                    <Project content={content} index={index}></Project>
                 ))}
             </div>
         );
