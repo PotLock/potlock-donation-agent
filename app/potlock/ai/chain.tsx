@@ -29,7 +29,7 @@ const potlockTool = tool(
     async (input, config) => {
         // need to api third party
         const similaritySearchResults = await hybridSearch(input.query, 'potlock', 5, 5);;
-        console.log(similaritySearchResults);
+        
         const filters = [];
         for (const doc of similaritySearchResults) {
             filters.push(JSON.parse(doc.pageContent))
