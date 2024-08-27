@@ -4,9 +4,9 @@ import {
     HumanMessagePromptTemplate,
     SystemMessagePromptTemplate,
 } from "@langchain/core/prompts";
-import { AgentExecutor, createToolCallingAgent } from "langchain/agents";
+import { AgentExecutor } from "langchain/agents";
 import { ChatOpenAI } from "@langchain/openai";
-import {  z } from "zod";
+import { z } from "zod";
 import { CreateTransaction } from "@/app/potlock/components/transaction";
 import { createRunnableUI } from "../utils/server";
 import { memory } from "./memory";
@@ -14,50 +14,28 @@ import { Project } from "../components/project";
 import { tool } from "@langchain/core/tools";
 import { createClient } from "@supabase/supabase-js";
 import { OpenAIEmbeddings } from "@langchain/openai";
-import { createRetrieverTool } from "langchain/tools/retriever";
 import { SupabaseVectorStore } from "@langchain/community/vectorstores/supabase";
 import {
-    Runnable,
-    RunnableLike,
     RunnableSequence,
 } from "@langchain/core/runnables";
 import { formatToOpenAIFunctionMessages } from "langchain/agents/format_scratchpad";
 import { OpenAIFunctionsAgentOutputParser } from "langchain/agents/openai/output_parser"
 import { convertToOpenAIFunction } from "@langchain/core/utils/function_calling";
-import { text } from "stream/consumers";
+import { hybridSearch } from "./tools";
 
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 
-const embeddings = new OpenAIEmbeddings({
-    model: "text-embedding-3-small",
-    apiKey: OPENAI_API_KEY
-});
-
-const supabaseClient = createClient(
-    process.env.SUPABASE_URL as string,
-    process.env.SUPABASE_PRIVATE_KEY as string
-);
-
-const vectorStore = new SupabaseVectorStore(embeddings, {
-    client: supabaseClient,
-    tableName: "documents",
-    queryName: "match_documents",
-});
-
 const potlockTool = tool(
     async (input, config) => {
-
-        const similaritySearchResults = await vectorStore.similaritySearchWithScore(input.query, 5);
-
+        // need to api third party
+        const similaritySearchResults = await hybridSearch(input.query, 'potlock', 5, 5);;
+        console.log(similaritySearchResults);
         const filters = [];
         for (const doc of similaritySearchResults) {
-            if (doc[1] > 0.4) {
-                filters.push(JSON.parse(doc[0].pageContent))
-            }
+            filters.push(JSON.parse(doc.pageContent))
         }
         const stream = await createRunnableUI(config);
         stream.update(<div>Searching potlock data...</div>);
-
         stream.done(
             <div className="flex gap-2 flex-wrap justify-end">
                 {filters.map((content, index) => (
@@ -66,11 +44,10 @@ const potlockTool = tool(
             </div>
         );
         if (filters.length > 0) {
-            return filters;
+            return JSON.stringify(filters);
         } else {
             return "No good search result found"
         }
-
     },
     {
         name: "potlockAPI",
@@ -83,10 +60,9 @@ const potlockTool = tool(
 
 const createTransactionTool = tool(
     async (input, config) => {
-
         const stream = await createRunnableUI(config);
-        const similaritySearchResults = await vectorStore.similaritySearchWithScore(input.query, 1);
-        const doc = JSON.parse(similaritySearchResults[0][0].pageContent)
+        const res = await hybridSearch(input.query, 'potlock', 1, 1);
+        const doc = JSON.parse(res[0].pageContent)
         stream.update(<div>Creating transaction</div>);
         //search vector project
         stream.done(
@@ -107,16 +83,16 @@ const createTransactionTool = tool(
                     }
                 }
             }
-            text={'Donate now'}
+                text={'Donate now'}
             ></CreateTransaction>
         );
-        return doc
+        return res
     },
     {
         name: "create-transaction",
         description: "A transaction tool for potlock . create transaction button",
         schema: z.object({
-            query: z.string().describe("The search query used to search for project."),
+            query: z.string().describe("The search query used to search for potlock's project."),
             amount: z.string().describe("Amount of Near to donate"),
         }),
     },

@@ -13,9 +13,8 @@ export default function GenerativeUIPage({ }) {
   const actions = useActions<typeof EndpointsContext>();
   const [elements, setElements] = useState<JSX.Element[]>([]);
   const [input, setInput] = useState("");
-  const historyState = useState<[role: string, content: any][]>([]);
+  const historyState = useState<[role: string, content: string][]>([]);
   const [history, setHistory] = historyState;
-
 
   async function onSubmit(input: string) {
     const newElements = [...elements];
@@ -64,6 +63,7 @@ export default function GenerativeUIPage({ }) {
       console.log("Failed to sign out");
       console.error(err);
     });
+    signOut()
   };
   return (
     <div>
