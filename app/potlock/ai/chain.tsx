@@ -85,8 +85,8 @@ const createTransactionTool = tool(
             }
                 text={'Donate now'}
             ></CreateTransaction>
-        );
-        return JSON.stringify(res)
+        ); 
+        return JSON.stringify(res) 
     },
     {
         name: "createTransaction",
