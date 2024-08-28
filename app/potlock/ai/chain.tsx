@@ -86,10 +86,10 @@ const createTransactionTool = tool(
                 text={'Donate now'}
             ></CreateTransaction>
         );
-        return res
+        return JSON.stringify(res)
     },
     {
-        name: "create-transaction",
+        name: "createTransaction",
         description: "A transaction tool for potlock . create transaction button",
         schema: z.object({
             query: z.string().describe("The search query used to search for potlock's project."),
