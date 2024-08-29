@@ -65,7 +65,7 @@ export default function GenerativeUIPage({ }) {
           const transaction = JSON.parse(toolEvent.value)
           const agentElement = (
             <div className="flex gap-2 flex-wrap justify-end">
-              <CreateTransaction transaction={transaction} text={`Click to Donate ${transaction.receiverId} ${transaction.deposit} Near `}></CreateTransaction>
+              <CreateTransaction transaction={transaction} text={`Click to Donate ${transaction.receiverId} ${transaction.action.params.deposit} Near `}></CreateTransaction>
             </div>
           )
           setElements(prevElements => [...prevElements, agentElement])
@@ -99,7 +99,6 @@ export default function GenerativeUIPage({ }) {
       console.log("Failed to sign out");
       console.error(err);
     });
-    signOut()
   };
   return (
     <div>
