@@ -29,10 +29,10 @@ export function streamRunnableUI<RunInput, RunOutput>(
 ) {
   const ui = createStreamableUI();
   const [lastEvent, resolve] = withResolvers<string>();
-
+  const [toolEvent, resolveToolEvent] = withResolvers<string>();
   (async () => {
     let lastEventValue: StreamEvent | null = null;
-
+    let toolEventValue: any | null = null;
     const callbacks: Record<
       string,
       ReturnType<typeof createStreamableUI | typeof createStreamableValue>
@@ -51,8 +51,13 @@ export function streamRunnableUI<RunInput, RunOutput>(
           ui.append(streamEvent.data.output.value);
         }
       }
+      
 
       const [kind, type] = streamEvent.event.split("_").slice(1);
+      if (streamEvent.event == 'on_tool_end') {
+        toolEventValue = { name: streamEvent.name, value: streamEvent.data.output }
+      }
+
       if (type === "stream" && kind !== "chain") {
         const chunk = streamEvent.data.chunk;
         if ("text" in chunk && typeof chunk.text === "string") {
@@ -69,20 +74,20 @@ export function streamRunnableUI<RunInput, RunOutput>(
           callbacks[streamEvent.run_id].append(chunk.text);
         }
       }
-
       lastEventValue = streamEvent;
     }
 
     // resolve the promise, which will be sent
     // to the client thanks to RSC
     resolve(lastEventValue?.data.output);
+    resolveToolEvent(toolEventValue);
     Object.values(callbacks).forEach((cb) => cb.done());
     const savedInput = (inputs as any)?.input ?? {};
     (await memory()).saveContext({ input: savedInput }, { output: lastEventValue?.data.output })
     ui.done();
   })();
 
-  return { ui: ui.value, lastEvent };
+  return { ui: ui.value, lastEvent , toolEvent };
 }
 
 /**
@@ -105,7 +110,6 @@ export const createRunnableUI = async (
     const ui = createStreamableUI(init);
     return ui;
   }).withConfig({ runName: STREAM_UI_RUN_NAME });
-
   return lambda.invoke(initialValue, config);
 };
 

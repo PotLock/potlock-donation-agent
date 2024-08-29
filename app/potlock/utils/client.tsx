@@ -1,16 +1,16 @@
 "use client";
 
-import { ReactNode, useContext } from "react";
+import { type ReactNode, useContext } from "react";
 import { createContext } from "react";
 
-const ActionsContext = createContext<any>(null);
+const ActionsContext = createContext<unknown>(null);
 
 /**
- * Internal provider exposing serialised React Actions
+ * Internal provider exposing serialized React Actions
  * This needs to be consumed in the layout of the route
  */
 export const AIProvider = (props: {
-  actions: Record<string, any>;
+  actions: Record<string, unknown>;
   children: ReactNode;
 }) => {
   return (
@@ -21,7 +21,7 @@ export const AIProvider = (props: {
 };
 
 /**
- * Use actions exposes via `exposeEndpoints` function in `@/app/generative_ui/utils/server.tsx`
+ * Use actions exposes via `exposeEndpoints` function in `@/utils/server.tsx`
  * Reason why we need this is because we can't import components as such due to NextJS limitations:
  *
  * server (layout) --> client (page) --> server (action) -x-> client (components for llm)

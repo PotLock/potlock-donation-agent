@@ -1,11 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useState, isValidElement, useRef } from "react";
 import type { EndpointsContext } from "./agent";
 import { useActions } from "./utils/client";
 import { LocalContext } from "./shared";
 import { useWalletSelector } from "@/app/contexts/WalletSelectorContext"
-import { signIn , signOut } from 'next-auth/react'
+import { signIn, signOut } from 'next-auth/react'
+import { Project } from "@/app/potlock/components/project";
+import { CreateTransaction } from "@/app/potlock/components/transaction";
 
 export default function GenerativeUIPage({ }) {
 
@@ -15,37 +17,71 @@ export default function GenerativeUIPage({ }) {
   const [input, setInput] = useState("");
   const historyState = useState<[role: string, content: string][]>([]);
   const [history, setHistory] = historyState;
+  const messageRef = useRef<HTMLDivElement | null>(null)
 
   async function onSubmit(input: string) {
-    const newElements = [...elements];
     // execute the agent with user input and chat history
-    const element = await actions.agent({ input, chat_history: history });
-    newElements.push(
-      <div className="flex flex-col gap-2" key={history.length}>
+
+    setInput("");
+
+    const userMessageElement = (
+      <div className="flex flex-col w-full gap-1 mt-auto" key={history.length}>
         <div className="bg-gray-700 p-3 rounded-lg self-start max-w-[50vw]">
           {input}
         </div>
-        <div className="self-end text-right flex flex-col gap-2 items-end">
-          {element.ui}
-        </div>
-      </div>,
+      </div>
     );
+    setElements(prevElements => [...prevElements, userMessageElement])
+    setHistory(prevHistory => [...prevHistory, ['user', input]]);
 
     // consume the value stream to obtain the final string value
     // after which we can append to our chat history state
     (async () => {
-      let lastEvent = await element.lastEvent;
-      if (typeof lastEvent === "string") {
-        setHistory((prev) => [
-          ...prev,
-          ["user", input],
+      // bug 
+      const element = await actions.agent({ input, chat_history: history });
+
+      const agentRes = (
+        <div className="self-end text-right flex flex-col gap-2 items-end">
+          {element.ui}
+        </div>
+      )
+      setElements(prevElements => [...prevElements, agentRes]);
+      let lastEvent: any = await element.lastEvent;
+      
+      const toolEvent: any = await element.toolEvent;
+      if (toolEvent) {
+        if (toolEvent.name == 'potlockAPI') {
+          const docs = JSON.parse(toolEvent.value)
+          const agentElement = (
+            <div className="flex gap-2 flex-wrap justify-end">
+              {docs.map((content: any, index: any) => (
+                content && <Project content={content} key={index}></Project>
+              ))}
+            </div>
+          )
+          setElements(prevElements => [...prevElements, agentElement])
+        }
+        if (toolEvent.name == 'createTransaction') {
+          const transaction = JSON.parse(toolEvent.value)
+          const agentElement = (
+            <div className="flex gap-2 flex-wrap justify-end">
+              <CreateTransaction transaction={transaction} text={`Click to Donate ${transaction.receiverId} ${transaction.deposit} Near `}></CreateTransaction>
+            </div>
+          )
+          setElements(prevElements => [...prevElements, agentElement])
+        }
+      }
+      
+      if (lastEvent) {
+        setHistory((prevHistory) => [
+          ...prevHistory,
           ["assistant", lastEvent],
         ]);
       }
+
     })();
 
-    setElements(newElements);
-    setInput("");
+
   }
   const subscription = modal.on("onHide", ({ hideReason }) => {
     console.log(`The reason for hiding the modal ${hideReason}`);

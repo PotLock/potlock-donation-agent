@@ -12,9 +12,6 @@ import { createRunnableUI } from "../utils/server";
 import { memory } from "./memory";
 import { Project } from "../components/project";
 import { tool } from "@langchain/core/tools";
-import { createClient } from "@supabase/supabase-js";
-import { OpenAIEmbeddings } from "@langchain/openai";
-import { SupabaseVectorStore } from "@langchain/community/vectorstores/supabase";
 import {
     RunnableSequence,
 } from "@langchain/core/runnables";
@@ -22,6 +19,7 @@ import { formatToOpenAIFunctionMessages } from "langchain/agents/format_scratchp
 import { OpenAIFunctionsAgentOutputParser } from "langchain/agents/openai/output_parser"
 import { convertToOpenAIFunction } from "@langchain/core/utils/function_calling";
 import { hybridSearch } from "./tools";
+import { json } from "stream/consumers";
 
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 
@@ -29,20 +27,12 @@ const potlockTool = tool(
     async (input, config) => {
         // need to api third party
         const similaritySearchResults = await hybridSearch(input.query, 'potlock', 5, 5);;
-        
+
         const filters = [];
         for (const doc of similaritySearchResults) {
             filters.push(JSON.parse(doc.pageContent))
         }
-        const stream = await createRunnableUI(config);
-        stream.update(<div>Searching potlock data...</div>);
-        stream.done(
-            <div className="flex gap-2 flex-wrap justify-end">
-                {filters.map((content, index) => (
-                    content && <Project content={content} key={index}></Project>
-                ))}
-            </div>
-        );
+
         if (filters.length > 0) {
             return JSON.stringify(filters);
         } else {
@@ -51,7 +41,7 @@ const potlockTool = tool(
     },
     {
         name: "potlockAPI",
-        description: "A search engine for potlock's project. input should be a search query.",
+        description: `A search engine for potlock's project. input should be a search query. Always say and no more explain : "Here is some information . If you have any questions please let me know"`,
         schema: z.object({
             query: z.string().describe("The search query used to search for potlock's project."),
         }),
@@ -60,33 +50,24 @@ const potlockTool = tool(
 
 const createTransactionTool = tool(
     async (input, config) => {
-        const stream = await createRunnableUI(config);
-        const res = await hybridSearch(input.query, 'potlock', 1, 1);
-        const doc = JSON.parse(res[0].pageContent)
-        stream.update(<div>Creating transaction</div>);
-        //search vector project
-        stream.done(
-            <CreateTransaction transaction={
-                {
-                    receiverId: "donate.potlock.near",
-                    action: {
-                        params: {
-                            methodName: "donate",
-                            args: {
-                                recipient_id: doc.accountId,
-                                bypass_protocol_fee: false,
-                                message: "Donate from mintbase wallet",
-                            },
-                            gas: "300000000000000",
-                            deposit: input.amount
-                        }
-                    }
+        const result = await hybridSearch(input.query, 'potlock', 1, 1);
+        const doc = JSON.parse(result[0].pageContent)
+        const transaction = {
+            receiverId: "donate.potlock.near",
+            action: {
+                params: {
+                    methodName: "donate",
+                    args: {
+                        recipient_id: doc.accountId,
+                        bypass_protocol_fee: false,
+                        message: "Donate from mintbase wallet",
+                    },
+                    gas: "300000000000000",
+                    deposit: input.amount
                 }
             }
-                text={'Donate now'}
-            ></CreateTransaction>
-        ); 
-        return JSON.stringify(res) 
+        }
+        return JSON.stringify(transaction);
     },
     {
         name: "createTransaction",

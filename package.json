@@ -18,8 +18,10 @@
     "@langchain/langgraph": "^0.0.31",
     "@langchain/mongodb": "^0.0.5",
     "@langchain/openai": "^0.2.6",
+    "@near-wallet-selector/bitte-wallet": "^8.9.12",
     "@near-wallet-selector/core": "^8.9.12",
     "@near-wallet-selector/here-wallet": "^8.9.12",
+    "@near-wallet-selector/meteor-wallet": "^8.9.12",
     "@near-wallet-selector/modal-ui": "^8.9.12",
     "@near-wallet-selector/my-near-wallet": "^8.9.12",
     "@near-wallet-selector/nightly": "^8.9.12",
@@ -45,7 +47,7 @@
     "rxjs": "^7.8.1",
     "tailwindcss": "3.3.3",
     "typescript": "5.1.6",
-    "zod": "^3.22.3",
+    "zod": "^3.23.8",
     "zod-to-json-schema": "^3.21.4"
   },
   "devDependencies": {

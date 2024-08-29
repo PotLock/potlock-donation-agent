@@ -6,6 +6,8 @@ import { setupModal } from "@near-wallet-selector/modal-ui";
 import { setupNightly } from "@near-wallet-selector/nightly";
 import { setupMyNearWallet } from "@near-wallet-selector/my-near-wallet";
 import { setupHereWallet } from "@near-wallet-selector/here-wallet";
+import { setupBitteWallet } from "@near-wallet-selector/bitte-wallet";
+import { setupMeteorWallet } from "@near-wallet-selector/meteor-wallet";
 
 import type { ReactNode } from "react";
 import React, {
@@ -61,6 +63,12 @@ export const WalletSelectorContextProvider: React.FC<{
         setupNightly(),
         setupMyNearWallet(),
         setupHereWallet(),
+        setupMeteorWallet(),
+        setupBitteWallet({
+          walletUrl: "https://wallet.bitte.ai",
+          callbackUrl: process.env.NEXTAUTH_URL,
+          deprecated: false,
+      }),
       ],
     });
     const _modal = setupModal(_selector, {
