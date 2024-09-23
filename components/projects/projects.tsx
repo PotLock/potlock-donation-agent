@@ -5,8 +5,8 @@ import { CodeBlock } from '@/components/ui/codeblock'
 import remarkGfm from 'remark-gfm'
 import remarkMath from 'remark-math'
 
-export const Projects = ({ props: { query } }: { props: any }) => {
-
+export  const Projects = ({ props: { data } }: { props: any }) => {
+    
     return (
 
         <>
@@ -49,9 +49,9 @@ export const Projects = ({ props: { query } }: { props: any }) => {
                     }
                 }}
             >
-                {query}
+                {data}
             </MemoizedReactMarkdown>
-        
+
         </>
 
     )

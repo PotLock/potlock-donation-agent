@@ -198,11 +198,15 @@ Whenever making a donate transaction only use the first transaction in the array
               }
             ]
           })
-
+          console.log(query);
+          const response = await fetch(`https://potlock-search-similarity-api.vercel.app/api/projects?q=${query}&k=1`);
+          
+          const data = await response.json();
+          console.log(data);
           return (
             <BotCard>
               <BotCard>
-                <Projects props={{ query }} />
+                <Projects props={{ data }} />
               </BotCard>
             </BotCard>
           )
