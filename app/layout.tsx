@@ -1,50 +1,69 @@
-"use client"
-import "./globals.css";
-import { Public_Sans } from "next/font/google";
-import "@near-wallet-selector/modal-ui/styles.css";
-import { Navbar } from "@/components/Navbar";
+
+import { GeistSans } from 'geist/font/sans'
+import { GeistMono } from 'geist/font/mono'
+
+import '@/app/globals.css'
+import { cn } from '@/lib/utils'
+import { TailwindIndicator } from '@/components/tailwind-indicator'
+import { Providers } from '@/components/providers'
+import { Header } from '@/components/header'
+import { Toaster } from '@/components/ui/sonner'
 import { WalletSelectorContextProvider } from "@/app/contexts/WalletSelectorContext"
-const publicSans = Public_Sans({ subsets: ["latin"] });
+import "@near-wallet-selector/modal-ui/styles.css";
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
+export const metadata = {
+  metadataBase: process.env.VERCEL_URL
+    ? new URL(`https://${process.env.VERCEL_URL}`)
+    : undefined,
+  title: {
+    default: 'AI-PGF',
+    template: `%s - AI-PGF AI Chatbot`
+  },
+  description: 'AI-PGF: A Proactive Grants Program and Movement to Build towards a Funding AGI',
+  icons: {
+    icon: '/favicon.ico',
+    shortcut: '/favicon-16x16.png',
+    apple: '/apple-touch-icon.png'
+  }
+}
 
-}) {
+export const viewport = {
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: 'white' },
+    { media: '(prefers-color-scheme: dark)', color: 'black' }
+  ]
+}
+
+interface RootLayoutProps {
+  children: React.ReactNode
+}
+
+export default function RootLayout({ children }: RootLayoutProps) {
   return (
-
-    <html lang="en">
-      <head>
-        <title>Funding AI</title>
-        <link rel="shortcut icon" href="/images/favicon.ico" />
-        <meta
-          name="description"
-          content="PotLock is the portal for public goods, non-profits, and communities to raise funds transparently through our global donor network"
-        />
-        <meta property="og:title" content="Funding AI" />
-        <meta
-          property="og:description"
-          content="PotLock is the portal for public goods, non-profits, and communities to raise funds transparently through our global donor network"
-        />
-        <meta property="og:image" content="/images/og-image.png" />
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content="Funding AI" />
-        <meta
-          name="twitter:description"
-          content="PotLock is the portal for public goods, non-profits, and communities to raise funds transparently through our global donor network"
-        />
-        <meta name="twitter:image" content="/images/og-image.png" />
-      </head>
-      <body className={publicSans.className}>
-        <div className="flex flex-col p-4 md:p-12 h-[100vh]">
-            <WalletSelectorContextProvider>
-              <Navbar></Navbar>
-              {children}
-            </WalletSelectorContextProvider>
-        </div>
+    <html lang="en" suppressHydrationWarning>
+      <body
+        className={cn(
+          'font-sans antialiased',
+          GeistSans.variable,
+          GeistMono.variable
+        )}
+      >
+        <Toaster position="top-center" />
+        <Providers
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <WalletSelectorContextProvider>
+            <div className="flex flex-col min-h-screen">
+              <Header />
+              <main className="flex flex-col flex-1 bg-muted/50">{children}</main>
+            </div>
+            <TailwindIndicator />
+          </WalletSelectorContextProvider>
+        </Providers>
       </body>
     </html>
-
-  );
+  )
 }

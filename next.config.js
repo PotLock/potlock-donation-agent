@@ -1,4 +1,13 @@
-const withBundleAnalyzer = require('@next/bundle-analyzer')({
-  enabled: process.env.ANALYZE === 'true',
-})
-module.exports = withBundleAnalyzer({})
+/** @type {import('next').NextConfig} */
+module.exports = {
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'avatars.githubusercontent.com',
+        port: '',
+        pathname: '**'
+      }
+    ]
+  },
+}

@@ -1,3 +1,4 @@
+"use client"
 
 import type { AccountState, WalletSelector } from "@near-wallet-selector/core";
 import { setupWalletSelector } from "@near-wallet-selector/core";
@@ -18,7 +19,6 @@ import React, {
   useMemo,
 } from "react";
 import { distinctUntilChanged, map } from "rxjs";
-
 
 
 declare global {
@@ -57,10 +57,10 @@ export const WalletSelectorContextProvider: React.FC<{
 
   const init = useCallback(async () => {
     const _selector = await setupWalletSelector({
-      network: "mainnet",
+      network: "testnet",
       debug: true,
       modules: [
-        setupNightly(),
+        setupNightly() as any,
         setupMyNearWallet(),
         setupHereWallet(),
         setupMeteorWallet(),
@@ -72,7 +72,7 @@ export const WalletSelectorContextProvider: React.FC<{
       ],
     });
     const _modal = setupModal(_selector, {
-      contractId: "donate.potlock.near",
+      contractId: "forum.potlock.near",
     });
     const state = _selector.store.getState();
     setAccounts(state.accounts);
@@ -101,10 +101,10 @@ export const WalletSelectorContextProvider: React.FC<{
 
     const subscription = selector.store.observable
       .pipe(
-        map((state) => state.accounts),
+        map((state:any) => state.accounts),
         distinctUntilChanged()
       )
-      .subscribe((nextAccounts) => {
+      .subscribe((nextAccounts:any) => {
         console.log("Accounts Update", nextAccounts);
 
         setAccounts(nextAccounts);
