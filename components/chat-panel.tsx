@@ -35,26 +35,26 @@ export function ChatPanel({
   const [shareDialogOpen, setShareDialogOpen] = React.useState(false)
 
   const exampleMessages : any[] = [
-    // {
-    //   heading: 'What are the',
-    //   subheading: 'trending memecoins today?',
-    //   message: `What are the trending memecoins today?`
-    // },
-    // {
-    //   heading: 'What is the price of',
-    //   subheading: '$DOGE right now?',
-    //   message: 'What is the price of $DOGE right now?'
-    // },
-    // {
-    //   heading: 'I would like to buy',
-    //   subheading: '42 $DOGE',
-    //   message: `I would like to buy 42 $DOGE`
-    // },
-    // {
-    //   heading: 'What are some',
-    //   subheading: `recent events about $DOGE?`,
-    //   message: `What are some recent events about $DOGE?`
-    // }
+    {
+      heading: 'Introducing some public good projects',
+      subheading: 'Suggest some projects',
+      message: `Introducing some public good projects?`
+    },
+    {
+      heading: 'What is Potlock project?',
+      subheading: 'Potlock project information',
+      message: 'What is Potlock project?'
+    },
+    {
+      heading: 'Donate 0.1 Near to Year of Chef',
+      subheading: 'Donate to a project',
+      message: `Donate 0.1 Near to Year of Che`
+    },
+    {
+      heading: 'Donate 0.1 Near to Magicbuild on AI pot',
+      subheading: `Donate the project to some pot`,
+      message: `Donate 0.1 Near to Magicbuild on AI pot`
+    }
   ]
 
   return (
