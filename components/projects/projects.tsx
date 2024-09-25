@@ -16,7 +16,7 @@ export const Projects = ({ props: { data } }: { props: any }) => {
                         {project.name}
                     </div>
                     <div className="text-zinc-500">
-                        {project.description.slice(0, 200)}...
+                        {project.description}
                     </div>
                 </div>
             ))}

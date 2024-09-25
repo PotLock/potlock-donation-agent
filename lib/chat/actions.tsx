@@ -20,10 +20,11 @@ import {
 import { z } from 'zod'
 import { ProjectsSkeleton } from '@/components/projects/projects-skeleton'
 import { Projects } from '@/components/projects/projects'
+import { DonateProject } from '@/components/projects/donate'
 
 import { PotsSkeleton } from '@/components/pots/pots-skeleton'
 import { Pots } from '@/components/pots/pots'
-
+import { DonatePot } from '@/components/pots/donate'
 import {
   formatNumber,
   runAsyncFnWithoutBlocking,
@@ -283,6 +284,124 @@ Whenever making a donate transaction only use the first transaction in the array
           )
         }
       },
+      createDonationProjectTransaction: {
+        description:
+          'Create donation transactions for project`s potlock',
+        parameters: z.object({
+          query: z.string().describe('Keywords search for project information'),
+          amount: z.number().describe('amount to donate')
+        }),
+        generate: async function* ({ query, amount }) {
+          yield (
+            <BotCard>
+              <ProjectsSkeleton />
+            </BotCard>
+          )
+          console.log("hello")
+          const response = await fetch(`https://potlock-search-similarity-api.vercel.app/api/projects?q=${query}`);
+          let project = await response.json();
+          project = project[0];
+          const toolCallId = nanoid()
+          aiState.done({
+            ...aiState.get(),
+            messages: [
+              ...aiState.get().messages,
+              {
+                id: nanoid(),
+                role: 'assistant',
+                content: [
+                  {
+                    type: 'tool-call',
+                    toolName: 'createDonationProjectTransaction',
+                    toolCallId,
+                    args: { query, amount }
+                  }
+                ]
+              },
+              {
+                id: nanoid(),
+                role: 'tool',
+                content: [
+                  {
+                    type: 'tool-result',
+                    toolName: 'createDonationProjectTransaction',
+                    toolCallId,
+                    result: { project }
+                  }
+                ]
+              }
+            ]
+          })
+          return (
+            <BotCard>
+              <BotCard>
+                <DonateProject props={{ project, amount }} />
+              </BotCard>
+            </BotCard>
+          )
+        }
+      },
+      createDonationPotTransaction: {
+        description:
+          'Create donation transactions for pot"s potlock',
+        parameters: z.object({
+          potName: z.string().describe('Keywords search for pot information'),
+          projectName: z.string().describe('Keywords search for project information'),
+          amount: z.number().describe('amount to donate')
+        }),
+        generate: async function* ({ potName, projectName, amount }) {
+          yield (
+            <BotCard>
+              <PotsSkeleton />
+            </BotCard>
+          )
+          const res = await fetch(`https://potlock-search-similarity-api.vercel.app/api/projects?q=${projectName}`);
+          const projectData = await res.json();
+          
+          const project = projectData[0]
+          const resPot = await fetch(`https://potlock-search-similarity-api.vercel.app/api/pots?q=${potName}`);
+          const potData = await resPot.json();
+          const pot = potData[0]
+          const toolCallId = nanoid()
+          aiState.done({
+            ...aiState.get(),
+            messages: [
+              ...aiState.get().messages,
+              {
+                id: nanoid(),
+                role: 'assistant',
+                content: [
+                  {
+                    type: 'tool-call',
+                    toolName: 'createDonationPotTransaction',
+                    toolCallId,
+                    args: { potName, projectName, amount }
+                  }
+                ]
+              },
+              {
+                id: nanoid(),
+                role: 'tool',
+                content: [
+                  {
+                    type: 'tool-result',
+                    toolName: 'createDonationPotTransaction',
+                    toolCallId,
+                    result: { project, pot }
+                  }
+                ]
+              }
+            ]
+          })
+          return (
+            <BotCard>
+              <BotCard>
+                <DonatePot props={{ pot, project, amount }} />
+              </BotCard>
+            </BotCard>
+          )
+        }
+      },
     }
   })
 
@@ -372,7 +491,15 @@ export const getUIStateFromAIState = (aiState: Chat) => {
             ) : tool.toolName === 'searchPot' ? (
               <BotCard>
                 <Pots props={tool.result} />
-              </BotCard>) : null
+              </BotCard>)
+              : tool.toolName === 'createDonationProjectTransaction' ? (
+                <BotCard>
+                  <DonateProject props={tool.result} />
+                </BotCard>)
+                : tool.toolName === 'createDonationPotTransaction' ? (
+                  <BotCard>
+                    <DonatePot props={tool.result} />
+                  </BotCard>) : null
           })
         ) : message.role === 'user' ? (
           <UserMessage>{message.content as string}</UserMessage>
