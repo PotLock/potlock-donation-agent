@@ -5,7 +5,7 @@ import { logOut } from '@/app/logout/actions'
 
 
 export function SignOutButton() {
-    const { modal, accountId, selector } = useWalletSelector();
+    const { selector } = useWalletSelector();
     const [isLoggingOut, setIsLoggingOut] = useState(false);
     const formRef = useRef<HTMLFormElement>(null)
     const handleSignOut = async () => {
