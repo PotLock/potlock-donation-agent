@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from 'react'
+import { useEffect } from 'react'
 import { useWalletSelector } from "@/app/contexts/WalletSelectorContext"
 
 import { type Session } from '@/lib/types'
