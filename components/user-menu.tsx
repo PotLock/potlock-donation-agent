@@ -26,24 +26,17 @@ function getUserInitials(name: string) {
 }
 
 export function UserMenu({ user }: UserMenuProps) {
-  const { modal, accountId, selector, accounts } = useWalletSelector();
+  const { accountId, selector, accounts } = useWalletSelector();
 
   const switchAccount = async () => {
     const email = user.email.replace('@mail.com', '');
-
-
     if (email !== accountId) {
       const isValid = accounts.find(account => account.accountId === email);
-      console.log("accountId", isValid);
-
       if (!isValid) {
         const wallet = await selector.wallet();
         await wallet.signOut();
         await logOut()
-      } else {
-        
       }
-
     }
   }
   useEffect(() => {
