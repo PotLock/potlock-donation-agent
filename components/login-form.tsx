@@ -15,7 +15,7 @@ import { signup } from '@/app/signup/actions'
 export default function LoginForm() {
   const router = useRouter()
   const [result, dispatch] = useFormState(authenticate, undefined)
-  const { modal, accountId, selector } = useWalletSelector();
+  const { modal, accountId, selector, accounts } = useWalletSelector();
   const [email, setEmail] = useState('');
   const [isUser, setIsUser] = useState(false);
   const [resultSignUp, dispatchSignIn] = useFormState(authenticate, undefined)
@@ -65,6 +65,9 @@ export default function LoginForm() {
       }
     }
   }, [resultSignUp, router])
+
+  
+
   return (
     <form
       action={isUser ? dispatchSignIn : dispatchSignUp}
@@ -115,7 +118,13 @@ export default function LoginForm() {
             </div>
           </div>
         </div>
-        <button className="my-4 flex h-10 w-full flex-row items-center justify-center rounded-md bg-zinc-900 p-2 text-sm font-semibold text-zinc-100 hover:bg-zinc-800 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-200" onClick={modal.show} disabled={pending}>{pending ? <IconSpinner /> : "Connect Wallet"}</button>
+        <button
+          className="my-4 flex h-10 w-full flex-row items-center justify-center rounded-md bg-zinc-900 p-2 text-sm font-semibold text-zinc-100 hover:bg-zinc-800 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-200"
+          onClick={modal.show}
+          disabled={pending}
+        >
+          {pending ? <IconSpinner /> : "Connect Wallet"}
+        </button>
 
       </div>
     </form>

@@ -199,7 +199,7 @@ Whenever making a donate transaction only use the first transaction in the array
                     type: 'tool-call',
                     toolName: 'searchProject',
                     toolCallId,
-                    args: { query }
+                    args: { query, k }
                   }
                 ]
               },
@@ -257,7 +257,7 @@ Whenever making a donate transaction only use the first transaction in the array
                     type: 'tool-call',
                     toolName: 'searchPot',
                     toolCallId,
-                    args: { query }
+                    args: { query, k }
                   }
                 ]
               },
@@ -297,7 +297,6 @@ Whenever making a donate transaction only use the first transaction in the array
               <ProjectsSkeleton />
             </BotCard>
           )
-          console.log("hello")
           const response = await fetch(`https://potlock-search-similarity-api.vercel.app/api/projects?q=${query}`);
           let project = await response.json();
           project = project[0];
@@ -357,7 +356,7 @@ Whenever making a donate transaction only use the first transaction in the array
           )
           const res = await fetch(`https://potlock-search-similarity-api.vercel.app/api/projects?q=${projectName}`);
           const projectData = await res.json();
-          
+
           const project = projectData[0]
           const resPot = await fetch(`https://potlock-search-similarity-api.vercel.app/api/pots?q=${potName}`);
           const potData = await resPot.json();

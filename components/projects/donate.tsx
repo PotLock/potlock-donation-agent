@@ -14,7 +14,8 @@ export const DonateProject = ({ props: { project, amount } }: { props: any }) =>
     const donate = async () => {
         setIsLoading(true)
         const wallet = await selector.wallet();
-        const outcome: any = await wallet.signAndSendTransaction({
+
+        await wallet.signAndSendTransaction({
             signerId: accountId!,
             receiverId: "donate.potlock.near",
             actions: [
@@ -23,12 +24,12 @@ export const DonateProject = ({ props: { project, amount } }: { props: any }) =>
                     params: {
                         methodName: "donate",
                         args: {
-                            recipient_id: project.accountId,
-                            bypass_protocol_fee: false,
-                            message: "Donate from Potlock Agent",
+                            "recipient_id": project.accountId,
+                            "bypass_protocol_fee": false,
+                            "message": "Donate from Potlock Agent",
                         },
                         gas: BOATLOAD_OF_GAS,
-                        deposit: utils.format.parseNearAmount(`${amount + ""}`)!,
+                        deposit: utils.format.parseNearAmount(`${amount || 0.1 + ""}`)!,
                     }
                 },
 
@@ -36,6 +37,7 @@ export const DonateProject = ({ props: { project, amount } }: { props: any }) =>
         }).then((nextMessages: any) => {
             setIsLoading(false)
         }).catch((err) => {
+            console.log("err", err)
             setIsLoading(false)
         });
 
@@ -63,7 +65,7 @@ export const DonateProject = ({ props: { project, amount } }: { props: any }) =>
                         disabled={isLoading}
                         onClick={donate}
                         className="w-full"
-                    >  {isLoading ? <><IconSpinner className="mr-2 animate-spin" />Waiting for user response... </> : `Donate ${amount} near ${project.name}`}   </Button> : <Button
+                    >  {isLoading ? <><IconSpinner className="mr-2 animate-spin" />Waiting for user response... </> : `Donate ${amount || '0.1'} near ${project.name}`}   </Button> : <Button
                         onClick={() => modal.show()}
                         className="w-full " >
                         Please Login to Donate

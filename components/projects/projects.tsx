@@ -8,7 +8,7 @@ export const Projects = ({ props: { data } }: { props: any }) => {
                     key={project.index}
                     className="flex shrink-0 flex-col gap-1 rounded-lg bg-zinc-800 p-4"
                 >
-                    <img className="object-fill" src={data.backgroundImage} />
+                    <img className="object-fill" src={project.backgroundImage} />
                     <div className="text-sm text-zinc-400">
 
                     </div>
