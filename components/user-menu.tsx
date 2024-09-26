@@ -39,10 +39,11 @@ export function UserMenu({ user }: UserMenuProps) {
       }
     }
   }
+
   useEffect(() => {
     switchAccount()
-
   }, [])
+  
   return (
     <div className="flex items-center justify-between">
       <DropdownMenu>
